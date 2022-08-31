@@ -11,8 +11,6 @@ services:
       context: ./
       dockerfile: ./docker/Dockerfile
     container_name: jasmin
-    volumes:
-      - ./jasmin:/usr/jasmin/jasmin
     ports:
       - 2775:2775
       - 8990:8990

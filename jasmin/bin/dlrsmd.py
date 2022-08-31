@@ -13,18 +13,18 @@ from jasmin.protocols.smpp.configs import SMPPServerPBClientConfig
 from jasmin.protocols.smpp.proxies import SMPPServerPBProxy
 from jasmin.queues.configs import AmqpConfig
 from jasmin.queues.factory import AmqpFactory
-from jasmin.routing.configs import DLRThrowerConfig
-from jasmin.routing.throwers import DLRThrower
+from jasmin.routing.configs import deliverSmThrowerConfig
+from jasmin.routing.throwers import deliverSmThrower
 
 ROOT_PATH = os.getenv('ROOT_PATH', '/')
 CONFIG_PATH = os.getenv('CONFIG_PATH', '%s/etc/jasmin/' % ROOT_PATH)
 
 class Options(usage.Options):
     optParameters = [
-        ['config', 'c', '%s/dlr.cfg' % CONFIG_PATH,
-         'Jasmin dlrd configuration file'],
+        ['config', 'c', '%s/dlrsm.cfg' % CONFIG_PATH,
+         'Jasmin dlrsmd configuration file'],
         ['id', 'i', 'master',
-         'Daemon id, need to be different for each dlrd daemon'],
+         'Daemon id, need to be different for each dlrsmd daemon'],
     ]
 
     optFlags = [
@@ -73,19 +73,19 @@ class DlrDaemon:
         if self.components['smpps-pb-client'].isConnected:
             return self.components['smpps-pb-client'].disconnect()
 
-    def startDLRThrowerService(self):
-        """Start DLRThrower"""
+    def startDLRSMService(self):
+        """Start deliverSMThrower"""
 
-        DLRThrowerConfigInstance = DLRThrowerConfig(self.options['config'])
-        self.components['dlr-thrower'] = DLRThrower(DLRThrowerConfigInstance)
-        self.components['dlr-thrower'].addSmpps(self.components['smpps-pb-client'])
+        deliverSMThrowerConfig = deliverSmThrowerConfig(self.options['config'])
+        self.components['deliversm-thrower'] = deliverSmThrower(deliverSMThrowerConfig)
+        self.components['deliversm-thrower'].addSmpps(self.components['smpps-pb-client'])
 
-        # AMQP Broker is used to listen to DLRThrower queue
-        return self.components['dlr-thrower'].addAmqpBroker(self.components['amqp-broker-factory'])
+        # AMQP Broker is used to listen to deliverSMThrower queue
+        return self.components['deliversm-thrower'].addAmqpBroker(self.components['amqp-broker-factory'])
 
-    def stopDLRThrowerService(self):
-        """Stop DLRThrower"""
-        return self.components['dlr-thrower'].stopService()
+    def stopDLRSMService(self):
+        """Stop deliverSMThrower"""
+        return self.components['deliversm-thrower'].stopService()
 
     @defer.inlineCallbacks
     def start(self):
@@ -113,25 +113,25 @@ class DlrDaemon:
 
         ########################################################
         try:
-            # Start DLRThrower
-            yield self.startDLRThrowerService()
+            # Start deliverSMThrower
+            yield self.startDLRSMService()
         except Exception as e:
-            syslog.syslog(syslog.LOG_ERR, "  Cannot start DLRThrower: %s" % e)
+            syslog.syslog(syslog.LOG_ERR, "  Cannot start deliverSMThrower: %s" % e)
         else:
-            syslog.syslog(syslog.LOG_INFO, "  DLRThrower Started.")
+            syslog.syslog(syslog.LOG_INFO, "  deliverSMThrower Started.")
 
     @defer.inlineCallbacks
     def stop(self):
         """Stop Dlrd daemon"""
-        syslog.syslog(syslog.LOG_INFO, "Stopping Dlr Daemon ...")
+        syslog.syslog(syslog.LOG_INFO, "Stopping Dlr SM Daemon ...")
 
         if 'smpps-pb-client' in self.components:
             yield self.stopSMPPServerPBClient()
             syslog.syslog(syslog.LOG_INFO, "  SMPPServerPBClient stopped.")
 
-        if 'dlr-thrower' in self.components:
-            yield self.stopDLRThrowerService()
-            syslog.syslog(syslog.LOG_INFO, "  DLRThrower stopped.")
+        if 'deliversm-thrower' in self.components:
+            yield self.stopDLRSMService()
+            syslog.syslog(syslog.LOG_INFO, "  DLR SM stopped.")
 
         if 'amqp-broker-client' in self.components:
             yield self.stopAMQPBrokerService()
@@ -153,7 +153,7 @@ if __name__ == '__main__':
         options.parseOptions()
 
         # Must not be executed simultaneously (c.f. #265)
-        lock = FileLock("/tmp/dlrd-%s" % options['id'])
+        lock = FileLock("/tmp/dlrsmd-%s" % options['id'])
 
         # Ensure there are no paralell runs of this script
         lock.acquire(timeout=2)
@@ -170,8 +170,8 @@ if __name__ == '__main__':
     except usage.UsageError as errortext:
         print('%s: %s' % (sys.argv[0], errortext))
         print('%s: Try --help for usage details.' % (sys.argv[0]))
-    except LockTimeout as e:
-        print("Lock not acquired ! exiting dlrd")
+    except LockTimeout:
+        print("Lock not acquired ! exiting...")
     except AlreadyLocked:
         print("There's another instance on dlrd running, exiting.")
     finally:

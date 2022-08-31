@@ -33,6 +33,11 @@ ENV RESOURCE_PATH /etc/jasmin/resource
 ENV STORE_PATH /etc/jasmin/store
 ENV LOG_PATH /var/log/jasmin
 
+ENV ENABLE_INTERCEPTOR yes
+ENV ENABLE_DLR_THROWER yes
+ENV ENABLE_DLR_LOOKUP yes
+ENV ENABLE_DELIVER_THROWER yes
+
 COPY misc/config/*.cfg ${CONFIG_PATH}/
 COPY misc/config/resource ${RESOURCE_PATH}
 
@@ -43,7 +48,7 @@ VOLUME ["/var/log/jasmin", "/etc/jasmin", "/etc/jasmin/store"]
 
 COPY docker/docker-entrypoint.sh /
 ENTRYPOINT ["/docker-entrypoint.sh"]
-CMD ["jasmind.py", "--enable-interceptor-client", "--enable-dlr-thrower", "--enable-dlr-lookup", "-u", "jcliadmin", "-p", "jclipwd"]
+CMD ["jasmind.py" , "--disable-deliver-thrower", "-u", "jcliadmin", "-p", "jclipwd"]
 # Notes:
 # - jasmind is started with native dlr-thrower and dlr-lookup threads instead of standalone processes
 # - restapi (0.9rc16+) is not started in this docker configuration

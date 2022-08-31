@@ -45,6 +45,9 @@ contents:
   - src: ./misc/config/dlr.cfg
     dst: "/etc/jasmin/dlr.cfg"
     type: config
+  - src: ./misc/config/dlrsm.cfg
+      dst: "/etc/jasmin/dlrsm.cfg"
+      type: config
   - src: ./misc/config/dlrlookupd.cfg
     dst: "/etc/jasmin/dlrlookupd.cfg"
     type: config
@@ -66,6 +69,9 @@ contents:
   - src: ./misc/config/systemd/jasmin-dlrlookupd.service
     dst: "/usr/lib/systemd/system/jasmin-dlrlookupd.service"
     type: config
+  - src: ./misc/config/systemd/jasmin-dlrsmd.service
+      dst: "/usr/lib/systemd/system/jasmin-dlrsmd.service"
+      type: config
   - src: ./misc/config/systemd/jasmin-interceptord.service
     dst: "/usr/lib/systemd/system/jasmin-interceptord.service"
     type: config
@@ -80,6 +86,8 @@ contents:
     dst: "/usr/local/bin/dlrd.py"
   - src: ./jasmin/bin/dlrlookupd.py
     dst: "/usr/local/bin/dlrlookupd.py"
+  - src: ./jasmin/bin/dlrsmd.py
+      dst: "/usr/local/bin/dlrsmd.py"
 scripts:
   postinstall: ./misc/packaging/scripts/common-postinstall.sh
   preremove: ./misc/packaging/scripts/common-preremove.sh

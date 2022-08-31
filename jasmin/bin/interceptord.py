@@ -116,7 +116,7 @@ if __name__ == '__main__':
         print('%s: %s' % (sys.argv[0], errortext))
         print('%s: Try --help for usage details.' % (sys.argv[0]))
     except LockTimeout:
-        print("Lock not acquired ! exiting")
+        print("Lock not acquired ! exiting interceptord")
     except AlreadyLocked:
         print("There's another instance on jasmind running, exiting.")
     finally:

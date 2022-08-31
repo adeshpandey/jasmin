@@ -1,0 +1,14 @@
+[Unit]
+Description=Jasmin SMS Gateway DLR Thrower standalone daemon
+Requires=network.target jasmind.service
+After=network.target jasmind.service
+
+[Service]
+SyslogIdentifier=jasmin-dlrsmsd
+PIDFile=/run/jasmin-dlrsmsd.pid
+User=jasmin
+Group=jasmin
+ExecStart=/usr/local/bin/dlrsmsd.py
+
+[Install]
+WantedBy=multi-user.target

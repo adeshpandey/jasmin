@@ -178,7 +178,7 @@ class JasminDaemon:
     @defer.inlineCallbacks
     def startDLRLookupService(self):
         """Start DLRLookup"""
-
+        print("start DLRLookup")
         DLRLookupConfigInstance = DLRLookupConfig(self.options['config'])
         self.components['dlrlookup'] = DLRLookup(DLRLookupConfigInstance, self.components['amqp-broker-factory'],
                                                  self.components['rc'])
@@ -545,8 +545,8 @@ if __name__ == '__main__':
     except usage.UsageError as errortext:
         print('%s: %s' % (sys.argv[0], errortext))
         print('%s: Try --help for usage details.' % (sys.argv[0]))
-    except LockTimeout:
-        print("Lock not acquired ! exiting")
+    except LockTimeout as e:
+        print("Lock not acquired ! exiting jasmind")
     except AlreadyLocked:
         print("There's another instance on jasmind running, exiting.")
     finally:
